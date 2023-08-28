@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <string.h>
+const int generator = 0b1011; 
+int performCRC(int message, int generator) {
+    int messageBits = message << 3; 
+    int dividend = messageBits;
+    int divisor = generator;
+    int divisorBits = 0;
+    while (dividend >= generator) {
+        divisorBits = 0;
+        while ((divisor << divisorBits) <= dividend) {
+            divisorBits++;
+        }
+        dividend ^= (divisor << (divisorBits - 1));
+    }
+    return (messageBits | dividend);
+}
+int main() {
+    int message;
+    printf("Enter the message: ");
+    scanf("%d", &message);
+    int codeword = performCRC(message, generator);
+    printf("Codeword: %d\n", codeword);
+    int position;
+    printf("Enter the bit position to simulate error: ");
+    scanf("%d", &position);
+    int errorCodeword = codeword ^ (1 << position);
+    printf("Codeword with simulated error: %d\n", errorCodeword);
+    int remainder = performCRC(errorCodeword, generator);
+    if (remainder == 0) {
+        printf("No error detected.\n");
+    } else {
+        printf("Error detected.\n");
+    }
+    return 0;
+}
