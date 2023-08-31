@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <arpa/inet.h>
+
+#define PORT 12345 // Choose a suitable port number
+
+int main() {
+    int sockfd;
+    struct sockaddr_in serverAddr;
+
+    // Create UDP socket
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd == -1) {
+        perror("Socket creation failed");
+        exit(1);
+    }
+
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+
+    // Send date and time using UDP
+    time_t currentTime;
+    struct tm *timeInfo;
+    char buffer[100];
+
+    time(&currentTime);
+    timeInfo = localtime(&currentTime);
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeInfo);
+
+    sendto(sockfd, (const char *)buffer, strlen(buffer), 0, (const struct sockaddr *)&serverAddr, sizeof(serverAddr));
+
+    printf("Date and time sent: %s\n", buffer);
+
+    close(sockfd);
+    return 0;
+}
